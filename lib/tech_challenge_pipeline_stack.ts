@@ -1,7 +1,7 @@
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
-import { CodeBuildAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 
 export class TechChallengePipelineStack extends Stack {
@@ -45,6 +45,18 @@ export class TechChallengePipelineStack extends Stack {
               },
               buildSpec: BuildSpec.fromSourceFilename('build_specs/pipeline_build_spec.yml')
             })
+          })
+        ]
+      })
+
+      techChallengePipeline.addStage({
+        stageName: 'PipelineUpdate',
+        actions: [
+          new CloudFormationCreateUpdateStackAction({
+            actionName: 'TechChallengePipelineUpdate',
+            stackName: 'TechChallengePipelineStack',
+            templatePath: infraBuildOutput.atPath('TechChallengePipelineStack.template.json'),
+            adminPermissions: true
           })
         ]
       })
