@@ -21,7 +21,7 @@ export class TechChallengePipelineStack extends Stack {
       actions: [
         new GitHubSourceAction({
           owner: 'cheeham51',
-          repo: 'pipeline-lab',
+          repo: 'tech_challenge_infra',
           branch: 'main',
           actionName: 'InfraPipelineSource',
           oauthToken: SecretValue.secretsManager('github-token'),
