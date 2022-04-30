@@ -53,9 +53,21 @@ export class TechChallengePipelineStack extends Stack {
         stageName: 'PipelineUpdate',
         actions: [
           new CloudFormationCreateUpdateStackAction({
-            actionName: 'TechChallengePipelineUpdate',
+            actionName: 'PipelineUpdate',
             stackName: 'TechChallengePipelineStack',
             templatePath: infraBuildOutput.atPath('TechChallengePipelineStack.template.json'),
+            adminPermissions: true
+          })
+        ]
+      })
+
+      techChallengePipeline.addStage({
+        stageName: 'Prod',
+        actions: [
+          new CloudFormationCreateUpdateStackAction({
+            actionName: 'InfraUpdate',
+            stackName: 'TechChallengeInfraStack',
+            templatePath: infraBuildOutput.atPath('TechChallengeInfraStack.template.json'),
             adminPermissions: true
           })
         ]
