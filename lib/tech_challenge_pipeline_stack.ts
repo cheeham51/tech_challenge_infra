@@ -15,6 +15,7 @@ export class TechChallengePipelineStack extends Stack {
     })
 
     const infraSourceOutput = new Artifact('InfraSourceOutput')
+    const appSourceOutput = new Artifact('AppSourceOutput')
 
     techChallengePipeline.addStage({
       stageName: 'Source',
@@ -26,6 +27,14 @@ export class TechChallengePipelineStack extends Stack {
           actionName: 'InfraPipelineSource',
           oauthToken: SecretValue.secretsManager('github-token'),
           output: infraSourceOutput
+        }),
+        new GitHubSourceAction({
+          owner: 'cheeham51',
+          repo: 'TechChallengeApp',
+          branch: 'main',
+          actionName: 'AppSource',
+          oauthToken: SecretValue.secretsManager('github-token'),
+          output: appSourceOutput
         })
       ]
     })
