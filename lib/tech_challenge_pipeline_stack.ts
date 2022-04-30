@@ -62,7 +62,7 @@ export class TechChallengePipelineStack extends Stack {
             outputs: [appBuildOutput],
             project: new PipelineProject(this, 'AppBuildProject', {
               environment: {
-                buildImage: LinuxBuildImage.STANDARD_5_0,
+                buildImage: LinuxBuildImage.AMAZON_LINUX_2_3,
                 privileged: true
               },
               buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml')
