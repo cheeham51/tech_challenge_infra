@@ -4,7 +4,7 @@ import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
-import {PolicyStatement, AnyPrincipal} from 'aws-cdk-lib/aws-iam'
+import {PolicyStatement, AccountPrincipal} from 'aws-cdk-lib/aws-iam'
 
 export class TechChallengePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -90,7 +90,7 @@ export class TechChallengePipelineStack extends Stack {
 
       appBuildProject.addToRolePolicy(
         new PolicyStatement({
-          principals: [new AnyPrincipal()],
+          // principals: [new AccountPrincipal(this.account)],
           actions: ['ecr:GetAuthorizationToken'],
           resources: ['*'],
         })
