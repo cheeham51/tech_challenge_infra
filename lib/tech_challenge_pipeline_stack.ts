@@ -9,8 +9,8 @@ import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
 
 export class TechChallengePipelineStack extends Stack {
   
-  public readonly ImageTag: string = 'latest'
-  public readonly appRepository: ecr.Repository
+  private readonly ImageTag: string = 'latest'
+  // public readonly appRepository: ecr.Repository
 
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
@@ -79,7 +79,7 @@ export class TechChallengePipelineStack extends Stack {
 
       const appBuildOutput = new Artifact('AppBuildOutput')
 
-      this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
+      const appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
       const appBuildProject = new PipelineProject(this, 'AppBuildProject', {
         environment: {
@@ -90,7 +90,7 @@ export class TechChallengePipelineStack extends Stack {
         environmentVariables: {
           AWS_DEFAULT_REGION: { value: `${this.region}` },
           AWS_ACCOUNT_ID: {value: `${this.account}`},
-          IMAGE_REPO_NAME: {value: `${this.appRepository.repositoryName}`},
+          IMAGE_REPO_NAME: {value: `${appRepository.repositoryName}`},
           IMAGE_TAG: {value: this.ImageTag}
         }
       })
