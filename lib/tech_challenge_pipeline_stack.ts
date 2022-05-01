@@ -3,6 +3,7 @@ import { Construct } from 'constructs';
 import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
+import * as ecr from 'aws-cdk-lib/aws-ecr';
 
 export class TechChallengePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -72,6 +73,8 @@ export class TechChallengePipelineStack extends Stack {
 
       const appBuildOutput = new Artifact('AppBuildOutput')
 
+      const appRepository = new ecr.Repository(this, 'TechChallengeRepository');
+
       techChallengePipeline.addStage({
         stageName: 'AppBuild',
         actions: [
@@ -84,9 +87,14 @@ export class TechChallengePipelineStack extends Stack {
                 buildImage: LinuxBuildImage.STANDARD_5_0,
                 privileged: true
               },
-              buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml')
-            })
-          })
+              buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml'),
+              environmentVariables: {
+                AWS_DEFAULT_REGION: { value: `${this.region}` },
+                AWS_ACCOUNT_ID: {value: `${this.account}`},
+              }
+            }),
+            runOrder: 2,
+          }),
         ]
       })
 
@@ -94,7 +102,7 @@ export class TechChallengePipelineStack extends Stack {
         stageName: 'Prod',
         actions: [
           new CloudFormationCreateUpdateStackAction({
-            actionName: 'InfraUpdate',
+            actionName: 'InfraDeploy',
             stackName: 'TechChallengeInfraStack',
             templatePath: infraBuildOutput.atPath('TechChallengeInfraStack.template.json'),
             adminPermissions: true
