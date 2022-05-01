@@ -5,14 +5,8 @@ import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
 import { Repository } from 'aws-cdk-lib/aws-ecr';
 
-interface TechChallengeInfraStackProps extends StackProps {
-  ImageTag: string,
-  Repo: Repository
-}
-
 export class TechChallengeInfraStack extends Stack {
-  // public readonly fargateService: ecs_patterns.ApplicationLoadBalancedFargateService
-  constructor(scope: Construct, id: string, props: TechChallengeInfraStackProps) {
+  constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
     // Create VPC and Fargate Cluster
