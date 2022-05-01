@@ -1,17 +1,18 @@
 import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
 import { Construct } from 'constructs';
 import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
-import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
-import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
+import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction, EcsDeployAction } from 'aws-cdk-lib/aws-codepipeline-actions';
+import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
-import {PolicyStatement, AccountPrincipal} from 'aws-cdk-lib/aws-iam'
+import {PolicyStatement} from 'aws-cdk-lib/aws-iam'
+import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
 
 export class TechChallengePipelineStack extends Stack {
   
   public readonly ImageTag: string = 'latest'
   public readonly appRepository: ecr.Repository
 
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
     const techChallengePipeline = new Pipeline(this, 'TechChallengePipeline', {

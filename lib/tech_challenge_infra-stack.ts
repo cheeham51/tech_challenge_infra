@@ -11,21 +11,23 @@ interface TechChallengeInfraStackProps extends StackProps {
 }
 
 export class TechChallengeInfraStack extends Stack {
+  // public readonly fargateService: ecs_patterns.ApplicationLoadBalancedFargateService
   constructor(scope: Construct, id: string, props: TechChallengeInfraStackProps) {
     super(scope, id, props);
 
     // Create VPC and Fargate Cluster
-    const vpc = new ec2.Vpc(this, 'TechChallengeVpc')
+    // const vpc = new ec2.Vpc(this, 'TechChallengeVpc')
+    // const cluster = new ecs.Cluster(this, 'Cluster', { vpc })
 
-    const cluster = new ecs.Cluster(this, 'Cluster', { vpc })
+    // Create
 
     // Instantiate Fargate Service with just cluster and image
-    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
-      cluster,
-      taskImageOptions: {
-        image: new ecs.EcrImage(props.Repo, props.ImageTag)
-      },
-    });
+    // this.fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
+    //   cluster,
+    //   taskImageOptions: {
+    //     image: new ecs.EcrImage(props.Repo, props.ImageTag)
+    //   },
+    // });
 
   }
 }

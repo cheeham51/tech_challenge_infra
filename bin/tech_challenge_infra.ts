@@ -8,7 +8,7 @@ const app = new cdk.App();
 
 const PipelineStack = new TechChallengePipelineStack(app, 'TechChallengePipelineStack', {});
 
-const InfraStack = new TechChallengeInfraStack(app, 'TechChallengeInfraStack', {
-    ImageTag: PipelineStack.ImageTag,
-    Repo: PipelineStack.appRepository
-});
+// const InfraStack = new TechChallengeInfraStack(app, 'TechChallengeInfraStack', {
+//     ImageTag: PipelineStack.ImageTag,
+//     Repo: PipelineStack.appRepository
+// });
