@@ -85,12 +85,13 @@ export class TechChallengePipelineStack extends Stack {
         environmentVariables: {
           AWS_DEFAULT_REGION: { value: `${this.region}` },
           AWS_ACCOUNT_ID: {value: `${this.account}`},
+          IMAGE_REPO_NAME: {value: `${appRepository.repositoryName}`},
+          IMAGE_TAG: {value: 'latest'}
         }
       })
 
       appBuildProject.addToRolePolicy(
         new PolicyStatement({
-          // principals: [new AccountPrincipal(this.account)],
           actions: ['ecr:GetAuthorizationToken'],
           resources: ['*'],
         })
