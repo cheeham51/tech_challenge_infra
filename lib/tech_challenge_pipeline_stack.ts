@@ -92,7 +92,7 @@ export class TechChallengePipelineStack extends Stack {
 
       appBuildProject.addToRolePolicy(
         new PolicyStatement({
-          actions: ['ecr:GetAuthorizationToken'],
+          actions: ['*'],
           resources: ['*'],
         })
       )
