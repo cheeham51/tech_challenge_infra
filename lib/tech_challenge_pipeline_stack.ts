@@ -7,6 +7,10 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {PolicyStatement, AccountPrincipal} from 'aws-cdk-lib/aws-iam'
 
 export class TechChallengePipelineStack extends Stack {
+  
+  public readonly ImageTag: string = 'latest'
+  public readonly appRepository: ecr.Repository
+
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
@@ -74,7 +78,7 @@ export class TechChallengePipelineStack extends Stack {
 
       const appBuildOutput = new Artifact('AppBuildOutput')
 
-      const appRepository = new ecr.Repository(this, 'TechChallengeRepository');
+      this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
       const appBuildProject = new PipelineProject(this, 'AppBuildProject', {
         environment: {
@@ -85,8 +89,8 @@ export class TechChallengePipelineStack extends Stack {
         environmentVariables: {
           AWS_DEFAULT_REGION: { value: `${this.region}` },
           AWS_ACCOUNT_ID: {value: `${this.account}`},
-          IMAGE_REPO_NAME: {value: `${appRepository.repositoryName}`},
-          IMAGE_TAG: {value: 'latest'}
+          IMAGE_REPO_NAME: {value: `${this.appRepository.repositoryName}`},
+          IMAGE_TAG: {value: this.ImageTag}
         }
       })
 

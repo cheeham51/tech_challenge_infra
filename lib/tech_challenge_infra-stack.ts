@@ -3,13 +3,29 @@ import { Construct } from 'constructs';
 import ec2 = require('aws-cdk-lib/aws-ec2');
 import * as ecs from 'aws-cdk-lib/aws-ecs';
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
+import { Repository } from 'aws-cdk-lib/aws-ecr';
+
+interface TechChallengeInfraStackProps extends StackProps {
+  ImageTag: string,
+  Repo: Repository
+}
 
 export class TechChallengeInfraStack extends Stack {
-  constructor(scope: Construct, id: string, props?: StackProps) {
+  constructor(scope: Construct, id: string, props: TechChallengeInfraStackProps) {
     super(scope, id, props);
 
     // Create VPC and Fargate Cluster
-    new ec2.Vpc(this, 'TechChallengeVpc')
+    const vpc = new ec2.Vpc(this, 'TechChallengeVpc')
+
+    const cluster = new ecs.Cluster(this, 'Cluster', { vpc })
+
+    // Instantiate Fargate Service with just cluster and image
+    const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
+      cluster,
+      taskImageOptions: {
+        image: new ecs.EcrImage(props.Repo, props.ImageTag)
+      },
+    });
 
   }
 }

@@ -6,6 +6,9 @@ import { TechChallengePipelineStack } from '../lib/tech_challenge_pipeline_stack
 
 const app = new cdk.App();
 
-new TechChallengeInfraStack(app, 'TechChallengeInfraStack', {});
+const PipelineStack = new TechChallengePipelineStack(app, 'TechChallengePipelineStack', {});
 
-new TechChallengePipelineStack(app, 'TechChallengePipelineStack', {});
+const InfraStack = new TechChallengeInfraStack(app, 'TechChallengeInfraStack', {
+    ImageTag: PipelineStack.ImageTag,
+    Repo: PipelineStack.appRepository
+});
