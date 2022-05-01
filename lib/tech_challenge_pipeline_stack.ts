@@ -4,6 +4,7 @@ import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { BuildEnvironmentVariableType, BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
+import {PolicyStatement, AnyPrincipal} from 'aws-cdk-lib/aws-iam'
 
 export class TechChallengePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
@@ -75,6 +76,26 @@ export class TechChallengePipelineStack extends Stack {
 
       const appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
+      const appBuildProject = new PipelineProject(this, 'AppBuildProject', {
+        environment: {
+          buildImage: LinuxBuildImage.STANDARD_5_0,
+          privileged: true
+        },
+        buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml'),
+        environmentVariables: {
+          AWS_DEFAULT_REGION: { value: `${this.region}` },
+          AWS_ACCOUNT_ID: {value: `${this.account}`},
+        }
+      })
+
+      appBuildProject.addToRolePolicy(
+        new PolicyStatement({
+          principals: [new AnyPrincipal()],
+          actions: ['ecr:GetAuthorizationToken'],
+          resources: ['*'],
+        })
+      )
+
       techChallengePipeline.addStage({
         stageName: 'AppBuild',
         actions: [
@@ -82,17 +103,7 @@ export class TechChallengePipelineStack extends Stack {
             actionName: 'AppBuild',
             input: appSourceOutput,
             outputs: [appBuildOutput],
-            project: new PipelineProject(this, 'AppBuildProject', {
-              environment: {
-                buildImage: LinuxBuildImage.STANDARD_5_0,
-                privileged: true
-              },
-              buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml'),
-              environmentVariables: {
-                AWS_DEFAULT_REGION: { value: `${this.region}` },
-                AWS_ACCOUNT_ID: {value: `${this.account}`},
-              }
-            }),
+            project: appBuildProject,
             runOrder: 2,
           }),
         ]
