@@ -6,7 +6,8 @@ import * as ecr from 'aws-cdk-lib/aws-ecr';
 
 interface FargateServiceProps {
     repo: ecr.Repository,
-    imageTag: string
+    imageTag: string,
+    vpc: ec2.Vpc
 }
 
 export class FargateService extends Construct {
@@ -20,8 +21,10 @@ export class FargateService extends Construct {
         super(scope, id);
 
         // Create VPC and Fargate Cluster
-        const vpc = new ec2.Vpc(this, 'MyVpc');
-        const cluster = new ecs.Cluster(this, 'Cluster', { vpc });
+        // const vpc = new ec2.Vpc(this, 'MyVpc');
+        const cluster = new ecs.Cluster(this, 'Cluster', {
+            vpc: props.vpc
+        });
 
         // this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 

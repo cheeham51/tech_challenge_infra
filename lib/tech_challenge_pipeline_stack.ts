@@ -6,12 +6,18 @@ import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-cod
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import { FargateService } from './constructs/fargate_service'
+import { Vpc } from 'aws-cdk-lib/aws-ec2';
+
+
+interface TechChallengePipelineStackProps extends StackProps {
+  vpc: Vpc
+}
 
 export class TechChallengePipelineStack extends Stack {
   
   private readonly ImageTag: string = 'latest'
 
-  constructor(scope: Construct, id: string, props: StackProps) {
+  constructor(scope: Construct, id: string, props: TechChallengePipelineStackProps) {
     super(scope, id, props);
 
     const techChallengePipeline = new Pipeline(this, 'TechChallengePipeline', {
@@ -118,7 +124,8 @@ export class TechChallengePipelineStack extends Stack {
       // Create Fargate service
       const fargateService = new FargateService(this, 'TechChallengeFargateService', {
         repo: appRepository,
-        imageTag: 'latest'
+        imageTag: 'latest',
+        vpc: props.vpc
       })
 
       techChallengePipeline.addStage({
