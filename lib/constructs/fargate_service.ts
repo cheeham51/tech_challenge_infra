@@ -5,13 +5,15 @@ import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns'
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 
 interface FargateServiceProps {
-
+    repo: ecr.Repository,
+    imageTag: string
 }
 
 export class FargateService extends Construct {
 
     public readonly appRepository: ecr.Repository;
     public readonly imageTag: string = 'latest'
+    public readonly fargateService: ecs_patterns.ApplicationLoadBalancedFargateService
 
     constructor (scope: Construct, id: string, props: FargateServiceProps) {
         super(scope, id);
@@ -20,13 +22,14 @@ export class FargateService extends Construct {
         const vpc = new ec2.Vpc(this, 'MyVpc');
         const cluster = new ecs.Cluster(this, 'Cluster', { vpc });
 
-        this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
+        // this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
         // Instantiate Fargate Service with just cluster and image
-        const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
+        this.fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
             cluster,
             taskImageOptions: {
-                image: new ecs.EcrImage(this.appRepository, this.imageTag),
+                image: new ecs.EcrImage(props.repo, props.imageTag),
+                containerPort: 3000,
             },
         });
 

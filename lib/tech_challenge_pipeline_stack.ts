@@ -15,9 +15,6 @@ export class TechChallengePipelineStack extends Stack {
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
 
-    // Create Fargate service
-    const fargateService = new FargateService(this, 'TechChallengeFargateService', {})
-
     const techChallengePipeline = new Pipeline(this, 'TechChallengePipeline', {
         crossAccountKeys: false,
         pipelineName: 'TechChallengePipeline',
@@ -91,11 +88,17 @@ export class TechChallengePipelineStack extends Stack {
         },
         buildSpec: BuildSpec.fromSourceFilename('build_specs/app_build_spec.yml'),
         environmentVariables: {
-          AWS_DEFAULT_REGION: { value: `${this.region}` },
-          AWS_ACCOUNT_ID: {value: `${this.account}`},
-          IMAGE_REPO_NAME: {value: `${fargateService.appRepository.repositoryName}`},
-          IMAGE_TAG: {value: fargateService.imageTag}
+          AWS_DEFAULT_REGION: { value: this.region },
+          AWS_ACCOUNT_ID: {value: this.account},
+          IMAGE_REPO_NAME: {value: appRepository.repositoryName},
+          IMAGE_TAG: {value: 'latest'}
         }
+      })
+
+      // Create Fargate service
+      const fargateService = new FargateService(this, 'TechChallengeFargateService', {
+        repo: appRepository,
+        imageTag: 'latest'
       })
 
       appBuildProject.addToRolePolicy(
