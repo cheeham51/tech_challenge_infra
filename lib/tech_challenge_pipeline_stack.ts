@@ -6,14 +6,17 @@ import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-cod
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
+import { FargateService } from './constructs/fargate_service'
 
 export class TechChallengePipelineStack extends Stack {
   
   private readonly ImageTag: string = 'latest'
-  // public readonly appRepository: ecr.Repository
 
   constructor(scope: Construct, id: string, props: StackProps) {
     super(scope, id, props);
+
+    // Create Fargate service
+    const fargateService = new FargateService(this, 'TechChallengeFargateService', {})
 
     const techChallengePipeline = new Pipeline(this, 'TechChallengePipeline', {
         crossAccountKeys: false,
@@ -90,8 +93,8 @@ export class TechChallengePipelineStack extends Stack {
         environmentVariables: {
           AWS_DEFAULT_REGION: { value: `${this.region}` },
           AWS_ACCOUNT_ID: {value: `${this.account}`},
-          IMAGE_REPO_NAME: {value: `${appRepository.repositoryName}`},
-          IMAGE_TAG: {value: this.ImageTag}
+          IMAGE_REPO_NAME: {value: `${fargateService.appRepository.repositoryName}`},
+          IMAGE_TAG: {value: fargateService.imageTag}
         }
       })
 
