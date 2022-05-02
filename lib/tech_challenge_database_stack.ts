@@ -8,6 +8,9 @@ interface TechChallengeDatabaseStackProps extends StackProps {
 }
 
 export class TechChallengeDatabaseStack extends Stack {
+    
+    public readonly rdsDatabase: rds.DatabaseInstance;
+
     constructor(scope: Construct, id: string, props: TechChallengeDatabaseStackProps) {
         super(scope, id, props);
 

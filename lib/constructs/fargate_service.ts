@@ -29,7 +29,7 @@ export class FargateService extends Construct {
         // this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
         // Instantiate Fargate Service with just cluster and image
-        const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
+        const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "WebAppFargateService", {
             cluster,
             taskImageOptions: {
                 containerName: this.containerName,
