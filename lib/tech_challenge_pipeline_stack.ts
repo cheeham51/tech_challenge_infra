@@ -5,7 +5,6 @@ import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAct
 import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {PolicyStatement} from 'aws-cdk-lib/aws-iam'
-import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns';
 import { FargateService } from './constructs/fargate_service'
 
 export class TechChallengePipelineStack extends Stack {
@@ -95,12 +94,6 @@ export class TechChallengePipelineStack extends Stack {
         }
       })
 
-      // Create Fargate service
-      const fargateService = new FargateService(this, 'TechChallengeFargateService', {
-        repo: appRepository,
-        imageTag: 'latest'
-      })
-
       appBuildProject.addToRolePolicy(
         new PolicyStatement({
           actions: ['*'],
@@ -121,6 +114,12 @@ export class TechChallengePipelineStack extends Stack {
         ]
       })
 
+      // Create Fargate service
+      const fargateService = new FargateService(this, 'TechChallengeFargateService', {
+        repo: appRepository,
+        imageTag: 'latest'
+      })
+
       techChallengePipeline.addStage({
         stageName: 'Prod',
         actions: [
@@ -129,6 +128,11 @@ export class TechChallengePipelineStack extends Stack {
             stackName: 'TechChallengeInfraStack',
             templatePath: infraBuildOutput.atPath('TechChallengeInfraStack.template.json'),
             adminPermissions: true
+          }),
+          new EcsDeployAction({
+            actionName: 'AppDeploy',
+            service: fargateService.service,
+            input: appBuildOutput
           })
         ]
       })

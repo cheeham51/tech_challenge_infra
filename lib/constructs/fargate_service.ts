@@ -13,7 +13,7 @@ export class FargateService extends Construct {
 
     public readonly appRepository: ecr.Repository;
     public readonly imageTag: string = 'latest'
-    public readonly fargateService: ecs_patterns.ApplicationLoadBalancedFargateService
+    public readonly service: ecs.FargateService
 
     constructor (scope: Construct, id: string, props: FargateServiceProps) {
         super(scope, id);
@@ -25,13 +25,15 @@ export class FargateService extends Construct {
         // this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
 
         // Instantiate Fargate Service with just cluster and image
-        this.fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
+        const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "FargateService", {
             cluster,
             taskImageOptions: {
                 image: new ecs.EcrImage(props.repo, props.imageTag),
                 containerPort: 3000,
             },
         });
+
+        this.service = fargateService.service
 
     }
 }
