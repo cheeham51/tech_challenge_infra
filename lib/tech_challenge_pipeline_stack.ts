@@ -90,7 +90,8 @@ export class TechChallengePipelineStack extends Stack {
           AWS_DEFAULT_REGION: { value: this.region },
           AWS_ACCOUNT_ID: {value: this.account},
           IMAGE_REPO_NAME: {value: appRepository.repositoryName},
-          IMAGE_TAG: {value: 'latest'}
+          IMAGE_TAG: {value: 'latest'},
+          REPOSITORY_URI: {value: appRepository.repositoryUri}
         }
       })
 
