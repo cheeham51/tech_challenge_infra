@@ -1,5 +1,5 @@
 import { Construct } from 'constructs';
-import { Stack, StackProps, CfnOutput, Duration, Token } from 'aws-cdk-lib';
+import { Stack, StackProps, CfnOutput, Duration, Token, SecretValue } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2';
 import { Port, SubnetType } from 'aws-cdk-lib/aws-ec2';
 import * as rds from 'aws-cdk-lib/aws-rds';
@@ -9,14 +9,12 @@ import { DockerImageCode } from 'aws-cdk-lib/aws-lambda';
 import { RetentionDays } from 'aws-cdk-lib/aws-logs';
 
 interface TechChallengeDatabaseStackProps extends StackProps {
-    vpc: ec2.Vpc
+    vpc: ec2.Vpc,
 }
 
 export class TechChallengeDatabaseStack extends Stack {
     
     public readonly rdsDatabase: rds.DatabaseInstance;
-    // public readonly password: string;
-    // public readonly host: string;
 
     constructor(scope: Construct, id: string, props: TechChallengeDatabaseStackProps) {
         super(scope, id, props);
@@ -27,11 +25,11 @@ export class TechChallengeDatabaseStack extends Stack {
             instanceType: ec2.InstanceType.of(ec2.InstanceClass.BURSTABLE3, ec2.InstanceSize.MICRO),
             vpc: props.vpc
         });
-
+          
         // Add custom resource to init database
         const rdsDataSeedingInitializer = new CdkResourceInitializer(this,    'myRdsDataSeedingInitializer', {
             config: {
-            credsSecretName: this.rdsDatabase.secret?.secretName
+                credsSecretName: this.rdsDatabase.secret?.secretName
             },
             fnLogRetention: RetentionDays.FIVE_MONTHS,
             fnCode: DockerImageCode.fromImageAsset(path.join(__dirname, '../', 'lambda/rds-init-fn-code'), {}),
@@ -44,7 +42,9 @@ export class TechChallengeDatabaseStack extends Stack {
         })
 
         // allow the initializer function to connect to the RDS instance
-        this.rdsDatabase.connections.allowFrom(rdsDataSeedingInitializer.function, Port.tcp(5432))
+        // this.rdsDatabase.connections.allowFrom(rdsDataSeedingInitializer.function, Port.tcp(5432))
+
+        this.rdsDatabase.connections.allowFromAnyIpv4(Port.tcp(5432));
 
         // allow initializer function to read RDS instance creds secret
         this.rdsDatabase.secret?.grantRead(rdsDataSeedingInitializer.function)

@@ -1,11 +1,10 @@
 import { Construct } from 'constructs';
-import { Token } from 'aws-cdk-lib';
+import { Token, SecretValue} from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns'
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {DatabaseInstance} from 'aws-cdk-lib/aws-rds'
-
 
 interface FargateServiceProps {
     repo: ecr.Repository,
@@ -27,7 +26,7 @@ export class FargateService extends Construct {
         // Create VPC and Fargate Cluster
         // const vpc = new ec2.Vpc(this, 'MyVpc');
         const cluster = new ecs.Cluster(this, 'Cluster', {
-            vpc: props.vpc
+            vpc: props.vpc,
         });
 
         // Instantiate Fargate Service with just cluster and image
@@ -37,12 +36,14 @@ export class FargateService extends Construct {
                 containerName: this.containerName,
                 image: new ecs.EcrImage(props.repo, props.imageTag),
                 containerPort: 3000,
-                environment: {
-                    VTT_DBPASSWORD: Token.asString(props.rds.secret?.secretValueFromJson('password')), // Pass RDS password from secret manager as an environment variable to Fargate without hardcoding the credentials
-                    VTT_DBHOST: Token.asString(props.rds.secret?.secretValueFromJson('host')), // Pass RDS host address from secret manager as an environment variable to Fargate without hardcoding the host address
-                  },
+                secrets: {
+                    VTT_DBPASSWORD: ecs.Secret.fromSecretsManager(props.rds.secret!, 'password'),
+                    VTT_DBHOST: ecs.Secret.fromSecretsManager(props.rds.secret!, 'host')
+                },
             },
         });
+
+        // props.rds.connections.allowFrom(fargateService.service, ec2.Port.tcp(5432));
 
         this.service = fargateService.service
 

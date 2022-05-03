@@ -131,7 +131,7 @@ export class TechChallengePipelineStack extends Stack {
       })
 
       // Add security group rule to allow access from Fargate Service to RDS on port 5432
-      props.rds.connections.allowFrom(fargateService.service, Port.tcp(5432));
+      // props.rds.connections.allowFrom(fargateService.service, Port.tcp(5432));
 
       techChallengePipeline.addStage({
         stageName: 'Prod',

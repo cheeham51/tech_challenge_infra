@@ -16,6 +16,4 @@ const DatabaseStack = new TechChallengeDatabaseStack(app, 'TechChallengeDatabase
 const PipelineStack = new TechChallengePipelineStack(app, 'TechChallengePipelineStack', {
     vpc: NetworkStack.vpc,
     rds: DatabaseStack.rdsDatabase,
-    // password: DatabaseStack.password,
-    // host: DatabaseStack.host
 });
