@@ -42,8 +42,6 @@ export class TechChallengeDatabaseStack extends Stack {
         })
 
         // allow the initializer function to connect to the RDS instance
-        // this.rdsDatabase.connections.allowFrom(rdsDataSeedingInitializer.function, Port.tcp(5432))
-
         this.rdsDatabase.connections.allowFromAnyIpv4(Port.tcp(5432));
 
         // allow initializer function to read RDS instance creds secret
