@@ -1,13 +1,17 @@
-import { Construct } from 'constructs'
+import { Construct } from 'constructs';
+import { Token } from 'aws-cdk-lib';
 import * as ec2 from 'aws-cdk-lib/aws-ec2'
 import * as ecs from 'aws-cdk-lib/aws-ecs'
 import * as ecs_patterns from 'aws-cdk-lib/aws-ecs-patterns'
 import * as ecr from 'aws-cdk-lib/aws-ecr';
+import {DatabaseInstance} from 'aws-cdk-lib/aws-rds'
+
 
 interface FargateServiceProps {
     repo: ecr.Repository,
     imageTag: string,
-    vpc: ec2.Vpc
+    vpc: ec2.Vpc,
+    rds: DatabaseInstance,
 }
 
 export class FargateService extends Construct {
@@ -26,8 +30,6 @@ export class FargateService extends Construct {
             vpc: props.vpc
         });
 
-        // this.appRepository = new ecr.Repository(this, 'TechChallengeRepository');
-
         // Instantiate Fargate Service with just cluster and image
         const fargateService = new ecs_patterns.ApplicationLoadBalancedFargateService(this, "WebAppFargateService", {
             cluster,
@@ -35,6 +37,10 @@ export class FargateService extends Construct {
                 containerName: this.containerName,
                 image: new ecs.EcrImage(props.repo, props.imageTag),
                 containerPort: 3000,
+                environment: {
+                    // VTT_DBPASSWORD: props.password, // Pass RDS password from secret manager as an environment variable to Fargate without hardcoding the credentials
+                    // VTT_DBHOST: props.host, // Pass RDS host address from secret manager as an environment variable to Fargate without hardcoding the host address
+                  },
             },
         });
 

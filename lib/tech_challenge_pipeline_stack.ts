@@ -1,16 +1,17 @@
-import { SecretValue, Stack, StackProps } from 'aws-cdk-lib';
+import { SecretValue, Stack, StackProps, CfnOutput, Duration, Token} from 'aws-cdk-lib';
 import { Construct } from 'constructs';
-import { Artifact, IStage, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
+import { Artifact, Pipeline } from 'aws-cdk-lib/aws-codepipeline';
 import { CodeBuildAction, CloudFormationCreateUpdateStackAction, GitHubSourceAction, EcsDeployAction } from 'aws-cdk-lib/aws-codepipeline-actions';
 import { BuildSpec, LinuxBuildImage, PipelineProject } from 'aws-cdk-lib/aws-codebuild';
 import * as ecr from 'aws-cdk-lib/aws-ecr';
 import {PolicyStatement} from 'aws-cdk-lib/aws-iam'
 import { FargateService } from './constructs/fargate_service'
-import { Vpc } from 'aws-cdk-lib/aws-ec2';
-
+import { Port, Vpc } from 'aws-cdk-lib/aws-ec2';
+import * as rds from 'aws-cdk-lib/aws-rds';
 
 interface TechChallengePipelineStackProps extends StackProps {
-  vpc: Vpc
+  vpc: Vpc,
+  rds: rds.DatabaseInstance,
 }
 
 export class TechChallengePipelineStack extends Stack {
@@ -124,19 +125,17 @@ export class TechChallengePipelineStack extends Stack {
       // Create Fargate service
       const fargateService = new FargateService(this, 'TechChallengeFargateService', {
         repo: appRepository,
-        imageTag: 'latest',
-        vpc: props.vpc
+        imageTag: this.ImageTag,
+        vpc: props.vpc,
+        rds: props.rds,
       })
+
+      // Add security group rule to allow access from Fargate Service to RDS on port 5432
+      props.rds.connections.allowFrom(fargateService.service, Port.tcp(5432));
 
       techChallengePipeline.addStage({
         stageName: 'Prod',
         actions: [
-          // new CloudFormationCreateUpdateStackAction({
-          //   actionName: 'InfraDeploy',
-          //   stackName: 'TechChallengeInfraStack',
-          //   templatePath: infraBuildOutput.atPath('TechChallengeInfraStack.template.json'),
-          //   adminPermissions: true
-          // }),
           new EcsDeployAction({
             actionName: 'AppDeploy',
             service: fargateService.service,
