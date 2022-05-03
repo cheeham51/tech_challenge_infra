@@ -38,8 +38,8 @@ export class FargateService extends Construct {
                 image: new ecs.EcrImage(props.repo, props.imageTag),
                 containerPort: 3000,
                 environment: {
-                    // VTT_DBPASSWORD: props.password, // Pass RDS password from secret manager as an environment variable to Fargate without hardcoding the credentials
-                    // VTT_DBHOST: props.host, // Pass RDS host address from secret manager as an environment variable to Fargate without hardcoding the host address
+                    VTT_DBPASSWORD: Token.asString(props.rds.secret?.secretValueFromJson('password')), // Pass RDS password from secret manager as an environment variable to Fargate without hardcoding the credentials
+                    VTT_DBHOST: Token.asString(props.rds.secret?.secretValueFromJson('host')), // Pass RDS host address from secret manager as an environment variable to Fargate without hardcoding the host address
                   },
             },
         });

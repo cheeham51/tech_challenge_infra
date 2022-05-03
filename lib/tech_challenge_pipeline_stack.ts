@@ -136,10 +136,25 @@ export class TechChallengePipelineStack extends Stack {
       techChallengePipeline.addStage({
         stageName: 'Prod',
         actions: [
+          new CloudFormationCreateUpdateStackAction({
+            actionName: 'NetworkStackUpdate',
+            stackName: 'TechChallengeNetworkStack',
+            templatePath: infraBuildOutput.atPath('TechChallengeNetworkStack.template.json'),
+            adminPermissions: true,
+            runOrder: 1
+          }),
+          new CloudFormationCreateUpdateStackAction({
+            actionName: 'DatabaseStackUpdate',
+            stackName: 'TechChallengeDatabaseStack',
+            templatePath: infraBuildOutput.atPath('TechChallengeDatabaseStack.template.json'),
+            adminPermissions: true,
+            runOrder: 2
+          }),
           new EcsDeployAction({
             actionName: 'AppDeploy',
             service: fargateService.service,
-            input: appBuildOutput
+            input: appBuildOutput,
+            runOrder: 3
           })
         ]
       })
